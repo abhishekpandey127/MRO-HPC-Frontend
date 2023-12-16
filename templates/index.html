@@ -2,22 +2,79 @@
 <html>
 <head>
     <title>Login Form</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            font-family: 'Lato', sans-serif;
+        }
+        .centered-content {
+            text-align: center;
+            margin: auto;
+            width: 50%;
+            padding: 10px;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto 20px; 
+        }
+        .first-image {
+            max-width: 35%; /* Adjust the width of the second image */
+        }
+
+        .second-image {
+            max-width: 65%; /* Adjust the width of the second image */
+        }
+
+        form {
+            margin-top: 20px;
+            margin-bottom: 250px;
+        }
+
+        h2 {
+            margin-top: 50px
+        }
+
+        p {
+            margin-top: 20px;
+            margin-bottom: 250px;
+        }
+    </style>
 </head>
 <body>
-    {% if not credentials_submitted %}
-        <h1>Enter HPC Credentials</h1>
-        <form action="/submit-form" method="post">
-            <label for="username">Username:</label>
-            <input type="text" id="username" name="username"><br><br>
-            <label for="password">Password:</label>
-            <input type="password" id="password" name="password"><br><br>
-            <input type="submit" value="Submit">
-        </form>
-    {% else %}
-        <h1>Run HPC Script</h1>
-        <form action="/run_script" method="post">
-            <input type="submit" value="Run">
-        </form>
-    {% endif %}
+    <div class="centered-content">
+        <div><img src="https://cloudmrhub.com/img/cloudMRIcon.png" alt="First Image" class="first-image"></div>
+        <div><img src="https://cloudmrhub.com/img/cloudMRText.png" alt="Second Image" class="second-image"></div>
+
+        {% if script_output %}
+            <h2>Script Output</h2>
+            <p>{{ script_output }}</p>
+        {% elif error_message %}
+            <h2>An Error Occured</h2>
+            <p>"{{ error_message }}"</p>
+        {% elif credentials_submitted %}
+            <h2>Run HPC Script</h2>
+            <form action="/run_script" method="post">
+                <input type="submit" value="Run">
+            </form>
+        {% else %}
+            <h2>Enter HPC Credentials</h2>
+            <form action="/submit-form" method="post">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username"><br><br>
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password"><br><br>
+                <input type="submit" value="Submit">
+            </form>
+        {% endif %}
+    </div>
 </body>
 </html>

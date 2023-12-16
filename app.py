@@ -102,13 +102,19 @@ def run_script():
         pattern = r"Submitted batch job \d+"
         match = re.search(pattern, output)
         extracted_string="No Match Found"
+        error_message="An error occured"
         if match:
             extracted_string = match.group()
-        return f"<h1>Script Output</h1><p>{extracted_string}</p>"
+        
+        return render_template('index.html', script_output=extracted_string)
 
+        
+    
     except Exception as e:
         # Handle exceptions and return an error message
-        return f"<h1>Error</h1><p>{e}</p>"
+        #return f"<h1>Error</h1><p>{e}</p>"
+        return render_template('index.html', error_message=e)
+    
     finally:
         ssh.close()
 
