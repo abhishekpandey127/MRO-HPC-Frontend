@@ -2,7 +2,6 @@ from flask import Flask, request, render_template, redirect, url_for
 import json
 import paramiko
 import bcrypt
-import json
 import os
 import time
 import re
