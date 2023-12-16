@@ -4,21 +4,20 @@
     <title>Login Form</title>
 </head>
 <body>
-    <h1>Enter HPC Credentials</h1>
-    <form action="/submit-form" method="post">
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username"><br><br>
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password"><br><br>
-        <input type="submit" value="Submit">
-    </form>
-</body>
-<body>
-    {% if data_saved %}
-    <h1>Run HPC Script</h1>
-    <form action="/run_script" method="post">
-        <input type="submit" value="Run">
-    </form>
+    {% if not credentials_submitted %}
+        <h1>Enter HPC Credentials</h1>
+        <form action="/submit-form" method="post">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username"><br><br>
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password"><br><br>
+            <input type="submit" value="Submit">
+        </form>
+    {% else %}
+        <h1>Run HPC Script</h1>
+        <form action="/run_script" method="post">
+            <input type="submit" value="Run">
+        </form>
     {% endif %}
 </body>
 </html>

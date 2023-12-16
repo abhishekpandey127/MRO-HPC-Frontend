@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, redirect, url_for
 import json
 import paramiko
 import json
@@ -23,7 +23,11 @@ def handle_login():
         json.dump(data, f)
     
     # Redirect to the same page but with data_saved set to True
-    return render_template('index.html', data_saved=True)
+    return redirect(url_for('run_script_page'))
+
+@app.route('/run-script-page')
+def run_script_page():
+    return render_template('index.html', credentials_submitted=True)
 
 @app.route('/run_script', methods=['POST'])
 def run_script():
