@@ -1,8 +1,8 @@
 boto3==1.34.2
 botocore==1.34.2
-cryptography @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_a3xvfhudbc/croot/cryptography_1689373681671/work
+cryptography
 paramiko==3.3.1
-bcrypt @ file:///Users/cbousseau/work/recipes/ci_py311/bcrypt_1677931459811/work
-regex @ file:///Users/cbousseau/work/recipes/ci_py311/regex_1677961821876/work
-Werkzeug @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_fc9kcczuwd/croot/werkzeug_1679489745296/work
-Flask @ file:///Users/cbousseau/work/recipes/ci_py311/flask_1677937489551/work
+bcrypt
+regex
+Werkzeug
+Flask
