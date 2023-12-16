@@ -46,7 +46,7 @@
         form input[type="text"], form input[type="password"] {
             margin: 10px 0;
             padding: 8px;
-            width: 80%; /* Adjust width as needed */
+            width: 80%;
         }
 
         form input[type="submit"] {
@@ -67,13 +67,13 @@
         .form-group {
             display: flex;
             align-items: center;
-            justify-content: space-between; /* Distribute space evenly */
+            justify-content: space-between;
             margin-bottom: 10px;
             white-space: nowrap;
         }
 
         .form-group label {
-            flex-basis: 30%; /* Adjust as needed */
+            flex-basis: 30%;
             text-align: right;
             margin-right: 10px;
         }
@@ -81,11 +81,10 @@
         .form-group input[type="text"],
         .form-group input[type="password"],
         .form-group input[type="file"] {
-            flex-basis: 60%; /* Adjust as needed */
+            flex-basis: 60%;
             padding: 8px;
         }
 
-        /* Adjustments for form width and input field spacing */
         form {
             max-width: 700px;
             margin: auto;
@@ -182,9 +181,9 @@
             })
             .then(response => response.text())
             .then(data => {
-                alert(data); // Display success message
+                alert(data);
                 successfulUploads++;
-                if (successfulUploads >= 3) { // Assuming you want all three files uploaded
+                if (successfulUploads >= 3) {
                     document.getElementById('nextButton').style.display = 'block';
                 }
             })

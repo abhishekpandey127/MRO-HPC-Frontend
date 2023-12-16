@@ -19,36 +19,34 @@ def index():
 @app.route('/hpc-aws', methods=['POST'])
 def handle_hpc_aws_login():
     username = request.form['username']
-    password = request.form['password']  # In a real app, hash the password
+    password = request.form['password']
     aws_access_key_id = request.form['aws_access_key_id']
     aws_secret_access_key = request.form['aws_secret_access_key']
     print(generate_key())
 
-    encrypted_password = encrypt_message(password, key)  # Use the same key
+    encrypted_password = encrypt_message(password, key)
 
     data = {'username': username, 'password': encrypted_password.decode('utf-8'), 'aws_access_key_id': aws_access_key_id, 'aws_secret_access_key': aws_secret_access_key}
         
     with open('data.json', 'w') as f:
         json.dump(data, f)
     
-    # Redirect to the same page but with data_saved set to True
     return redirect(url_for('file_upload_page'))
 
 @app.route('/hpc-only', methods=['POST'])
 def handle_hpc_login():
     username = request.form['username']
-    password = request.form['password']  # In a real app, hash the password
+    password = request.form['password']
     
     print(generate_key())
 
-    encrypted_password = encrypt_message(password, key)  # Use the same key
+    encrypted_password = encrypt_message(password, key)
 
     data = {'username': username, 'password': encrypted_password.decode('utf-8')}
         
     with open('data.json', 'w') as f:
         json.dump(data, f)
     
-    # Redirect to the same page but with data_saved set to True
     return redirect(url_for('hpc_ready'))
 
 @app.route('/file_upload')
@@ -102,7 +100,6 @@ def allowed_file(filename):
 def run_script():
     json_file_path = 'data.json'
 
-    # Function to connect to an SSH server
     def ssh_connect(ssh_client, hostname, username, password):
         known_hosts_file = os.path.expanduser('~/.ssh/known_hosts')
         host_key_known = False
@@ -155,8 +152,6 @@ def run_script():
 
 
         #Running sbatch file
-        #print("Submitting batch job")
-        #target_ssh.send('ls /scratch/'+creds["username"]+'/test/mro/' + '\n')
         target_ssh.send('sbatch /scratch/'+creds["username"]+'/test/mro/run-mro.sbatch' + '\n')
         time.sleep(5)
         
@@ -174,8 +169,6 @@ def run_script():
         
     
     except Exception as e:
-        # Handle exceptions and return an error message
-        #return f"<h1>Error</h1><p>{e}</p>"
         return render_template('index.html', error_message=e)
     
     finally:
@@ -184,13 +177,11 @@ def run_script():
 def generate_key():
     return Fernet.generate_key()
 
-# Function to encrypt a message
 def encrypt_message(message, key):
     f = Fernet(key)
     encrypted_message = f.encrypt(message.encode())
     return encrypted_message
 
-# Function to decrypt a message
 def decrypt_message(encrypted_message, key):
     f = Fernet(key)
     decrypted_message = f.decrypt(encrypted_message).decode()
