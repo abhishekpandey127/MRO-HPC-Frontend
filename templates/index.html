@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Login Form</title>
+    <title>MROptimum - HPC</title>
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
     <style>
         html, body {
@@ -27,16 +27,32 @@
             margin: 0 auto 20px; 
         }
         .first-image {
-            max-width: 35%; /* Adjust the width of the second image */
+            max-width: 35%;
         }
 
         .second-image {
-            max-width: 65%; /* Adjust the width of the second image */
+            max-width: 65%;
         }
 
         form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
             margin-top: 20px;
-            margin-bottom: 250px;
+            margin-bottom: 20px;
+        }
+
+        form input[type="text"], form input[type="password"] {
+            margin: 10px 0;
+            padding: 8px;
+            width: 80%; /* Adjust width as needed */
+        }
+
+        form input[type="submit"] {
+            margin-top: 10px;
+            padding: 8px 16px;
+            cursor: pointer;
         }
 
         h2 {
@@ -46,6 +62,33 @@
         p {
             margin-top: 20px;
             margin-bottom: 250px;
+        }
+
+        .form-group {
+            display: flex;
+            align-items: center;
+            justify-content: space-between; /* Distribute space evenly */
+            margin-bottom: 10px;
+            white-space: nowrap;
+        }
+
+        .form-group label {
+            flex-basis: 30%; /* Adjust as needed */
+            text-align: right;
+            margin-right: 10px;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="password"],
+        .form-group input[type="file"] {
+            flex-basis: 60%; /* Adjust as needed */
+            padding: 8px;
+        }
+
+        /* Adjustments for form width and input field spacing */
+        form {
+            max-width: 700px;
+            margin: auto;
         }
     </style>
 </head>
@@ -61,20 +104,111 @@
             <h2>An Error Occured</h2>
             <p>"{{ error_message }}"</p>
         {% elif credentials_submitted %}
+            <h2>Upload Files</h2>
+            <form id="uploadForm1" enctype="multipart/form-data">
+                <div class="form-group">    
+                    <label for="signalfile">Add Signal File</label>
+                    <input type="file" name="file">
+                    <input type="button" value="Upload to cloudmrhubdata" onclick="uploadFile(1);">
+                </div>
+            </form>
+            
+            <form id="uploadForm2" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="noisefile">Add Noise File</label>
+                    <input type="file" name="file">
+                    <input type="button" value="Upload to cloudmrhubdata" onclick="uploadFile(2);">
+                </div>
+            </form>
+            
+            <form id="uploadForm3" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="jsonjob">Add JSON Job</label>
+                    <input type="file" name="file">
+                    <input type="button" value="Upload to mroptimum-jobs" onclick="uploadFile(3);">
+                </div>
+            </form>
+            <form action="/hpc_ready" method="get">
+                <input type="submit" value="Next">   
+        {% elif files_uploaded %}
             <h2>Run HPC Script</h2>
             <form action="/run_script" method="post">
                 <input type="submit" value="Run">
             </form>
         {% else %}
             <h2>Enter HPC Credentials</h2>
-            <form action="/submit-form" method="post">
-                <label for="username">Username:</label>
-                <input type="text" id="username" name="username"><br><br>
-                <label for="password">Password:</label>
-                <input type="password" id="password" name="password"><br><br>
-                <input type="submit" value="Submit">
+            <form id="credentialsForm" action="/hpc-only" method="post">
+                <div class="form-group">
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" name="username">
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password">
+                </div>
+                <div class="form-group">
+                    <label for="awsCredentialsToggle">Provide AWS Credentials</label>
+                    <input type="checkbox" id="awsCredentialsToggle" name="awsCredentialsToggle" onchange="updateFormAction()">
+                </div>
+                <div id="awsCredentialsFields" style="display: none;">
+                    <div class="form-group">
+                        <label for="aws_access_key_id">AWS_ACCESS_KEY_ID:</label>
+                        <input type="text" id="aws_access_key_id" name="aws_access_key_id">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="aws_secret_access_key">AWS_SECRET_ACCESS_KEY:</label>
+                        <input type="text" id="aws_secret_access_key" name="aws_secret_access_key">
+                    </div>
+                </div>
+                
+                <input type="submit" value="Submit">            
             </form>
         {% endif %}
     </div>
+
+    <script>
+        var successfulUploads = 0;
+        
+        function uploadFile(formId) {
+            var formData = new FormData(document.getElementById('uploadForm' + formId));
+            var bucketName = formId === 3 ? 'mroptimum-jobs' : 'cloudmrhubdata';
+            formData.append('bucket', bucketName);
+        
+            fetch('/upload_to_bucket' + formId, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.text())
+            .then(data => {
+                alert(data); // Display success message
+                successfulUploads++;
+                if (successfulUploads >= 3) { // Assuming you want all three files uploaded
+                    document.getElementById('nextButton').style.display = 'block';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error: ' + error);
+            });
+        }
+        </script>
+        
+        <script>
+            function updateFormAction() {
+                var form = document.getElementById('credentialsForm');
+                var awsCredentialsToggle = document.getElementById('awsCredentialsToggle');
+                var awsCredentialsFields = document.getElementById('awsCredentialsFields');
+        
+                if (awsCredentialsToggle.checked) {
+                    form.action = '/hpc-aws';
+                    awsCredentialsFields.style.display = 'block';
+                } else {
+                    form.action = '/hpc-only';
+                    awsCredentialsFields.style.display = 'none';
+                }
+            }
+        </script>
 </body>
 </html>
