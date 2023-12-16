@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Login Form</title>
+    <title>MROptimum - HPC</title>
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
     <style>
         html, body {
@@ -27,16 +27,32 @@
             margin: 0 auto 20px; 
         }
         .first-image {
-            max-width: 35%; /* Adjust the width of the second image */
+            max-width: 35%;
         }
 
         .second-image {
-            max-width: 65%; /* Adjust the width of the second image */
+            max-width: 65%;
         }
 
         form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
             margin-top: 20px;
-            margin-bottom: 250px;
+            margin-bottom: 20px;
+        }
+
+        form input[type="text"], form input[type="password"] {
+            margin: 10px 0;
+            padding: 8px;
+            width: 80%; /* Adjust width as needed */
+        }
+
+        form input[type="submit"] {
+            margin-top: 10px;
+            padding: 8px 16px;
+            cursor: pointer;
         }
 
         h2 {
@@ -46,6 +62,32 @@
         p {
             margin-top: 20px;
             margin-bottom: 250px;
+        }
+
+        .form-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .form-group label {
+            flex-basis: 20%; /* Fixed portion of the width */
+            flex-shrink: 0;  /* Prevents the label from shrinking */
+            margin-right: 10px;
+        }
+
+        .form-group input[type="text"], 
+        .form-group input[type="password"] {
+            flex-grow: 1; /* Allows the input to grow and fill the space */
+            flex-basis: 70%; /* Initial base width of the input */
+            padding: 8px;
+        }
+
+        /* Adjustments for form width and input field spacing */
+        form {
+            width: 80%; /* Adjust the form width as needed */
+            max-width: 500px; /* Optional: Sets a maximum width for the form */
+            margin: auto; /* Centers the form in the page */
         }
     </style>
 </head>
@@ -61,6 +103,24 @@
             <h2>An Error Occured</h2>
             <p>"{{ error_message }}"</p>
         {% elif credentials_submitted %}
+            <h2>Upload Files</h2>
+            <form id="uploadForm1" enctype="multipart/form-data">
+                <input type="file" name="file">
+                <input type="button" value="Upload to cloudmrhubdata" onclick="uploadFile(1);">
+            </form>
+            
+            <form id="uploadForm2" enctype="multipart/form-data">
+                <input type="file" name="file">
+                <input type="button" value="Upload to cloudmrhubdata" onclick="uploadFile(2);">
+            </form>
+            
+            <form id="uploadForm3" enctype="multipart/form-data">
+                <input type="file" name="file">
+                <input type="button" value="Upload to mroptimum-jobs" onclick="uploadFile(3);">
+            </form>
+            <form action="/hpc_ready" method="get">
+                <input type="submit" value="Next">   
+        {% elif files_uploaded %}
             <h2>Run HPC Script</h2>
             <form action="/run_script" method="post">
                 <input type="submit" value="Run">
@@ -68,13 +128,56 @@
         {% else %}
             <h2>Enter HPC Credentials</h2>
             <form action="/submit-form" method="post">
-                <label for="username">Username:</label>
-                <input type="text" id="username" name="username"><br><br>
-                <label for="password">Password:</label>
-                <input type="password" id="password" name="password"><br><br>
-                <input type="submit" value="Submit">
+                <div class="form-group">
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" name="username">
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password">
+                </div>
+                
+                <div class="form-group">
+                    <label for="aws_access_key_id">AWS_ACCESS_KEY_ID:</label>
+                    <input type="text" id="aws_access_key_id" name="aws_access_key_id">
+                </div>
+                
+                <div class="form-group">
+                    <label for="aws_secret_access_key">AWS_SECRET_ACCESS_KEY:</label>
+                    <input type="text" id="aws_secret_access_key" name="aws_secret_access_key">
+                </div>
+                
+                <input type="submit" value="Submit">            
             </form>
         {% endif %}
     </div>
+
+    <script>
+        var successfulUploads = 0;
+        
+        function uploadFile(formId) {
+            var formData = new FormData(document.getElementById('uploadForm' + formId));
+            var bucketName = formId === 3 ? 'mroptimum-jobs' : 'cloudmrhubdata';
+            formData.append('bucket', bucketName);
+        
+            fetch('/upload_to_bucket' + formId, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.text())
+            .then(data => {
+                alert(data); // Display success message
+                successfulUploads++;
+                if (successfulUploads >= 3) { // Assuming you want all three files uploaded
+                    document.getElementById('nextButton').style.display = 'block';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error: ' + error);
+            });
+        }
+        </script>   
 </body>
 </html>
