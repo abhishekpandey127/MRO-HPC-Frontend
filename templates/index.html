@@ -67,27 +67,28 @@
         .form-group {
             display: flex;
             align-items: center;
+            justify-content: space-between; /* Distribute space evenly */
             margin-bottom: 10px;
+            white-space: nowrap;
         }
 
         .form-group label {
-            flex-basis: 20%; /* Fixed portion of the width */
-            flex-shrink: 0;  /* Prevents the label from shrinking */
+            flex-basis: 30%; /* Adjust as needed */
+            text-align: right;
             margin-right: 10px;
         }
 
-        .form-group input[type="text"], 
-        .form-group input[type="password"] {
-            flex-grow: 1; /* Allows the input to grow and fill the space */
-            flex-basis: 70%; /* Initial base width of the input */
+        .form-group input[type="text"],
+        .form-group input[type="password"],
+        .form-group input[type="file"] {
+            flex-basis: 60%; /* Adjust as needed */
             padding: 8px;
         }
 
         /* Adjustments for form width and input field spacing */
         form {
-            width: 80%; /* Adjust the form width as needed */
-            max-width: 500px; /* Optional: Sets a maximum width for the form */
-            margin: auto; /* Centers the form in the page */
+            max-width: 700px;
+            margin: auto;
         }
     </style>
 </head>
@@ -105,18 +106,27 @@
         {% elif credentials_submitted %}
             <h2>Upload Files</h2>
             <form id="uploadForm1" enctype="multipart/form-data">
-                <input type="file" name="file">
-                <input type="button" value="Upload to cloudmrhubdata" onclick="uploadFile(1);">
+                <div class="form-group">    
+                    <label for="signalfile">Add Signal File</label>
+                    <input type="file" name="file">
+                    <input type="button" value="Upload to cloudmrhubdata" onclick="uploadFile(1);">
+                </div>
             </form>
             
             <form id="uploadForm2" enctype="multipart/form-data">
-                <input type="file" name="file">
-                <input type="button" value="Upload to cloudmrhubdata" onclick="uploadFile(2);">
+                <div class="form-group">
+                    <label for="noisefile">Add Noise File</label>
+                    <input type="file" name="file">
+                    <input type="button" value="Upload to cloudmrhubdata" onclick="uploadFile(2);">
+                </div>
             </form>
             
             <form id="uploadForm3" enctype="multipart/form-data">
-                <input type="file" name="file">
-                <input type="button" value="Upload to mroptimum-jobs" onclick="uploadFile(3);">
+                <div class="form-group">
+                    <label for="jsonjob">Add JSON Job</label>
+                    <input type="file" name="file">
+                    <input type="button" value="Upload to mroptimum-jobs" onclick="uploadFile(3);">
+                </div>
             </form>
             <form action="/hpc_ready" method="get">
                 <input type="submit" value="Next">   
@@ -138,8 +148,8 @@
                     <input type="password" id="password" name="password">
                 </div>
                 <div class="form-group">
-                    <input type="checkbox" id="awsCredentialsToggle" name="awsCredentialsToggle" onchange="updateFormAction()">
                     <label for="awsCredentialsToggle">Provide AWS Credentials</label>
+                    <input type="checkbox" id="awsCredentialsToggle" name="awsCredentialsToggle" onchange="updateFormAction()">
                 </div>
                 <div id="awsCredentialsFields" style="display: none;">
                     <div class="form-group">
