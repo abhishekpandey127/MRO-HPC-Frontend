@@ -17,8 +17,8 @@ key = b'2QRt49fEUksjR6Yxpmjs98qtJ7-RYmKXLXblEKMuSjU='
 def index():
     return render_template('index.html', data_saved=False)
 
-@app.route('/submit-form', methods=['POST'])
-def handle_login():
+@app.route('/hpc-aws', methods=['POST'])
+def handle_hpc_aws_login():
     username = request.form['username']
     password = request.form['password']  # In a real app, hash the password
     aws_access_key_id = request.form['aws_access_key_id']
@@ -35,6 +35,23 @@ def handle_login():
     # Redirect to the same page but with data_saved set to True
     return redirect(url_for('file_upload_page'))
 
+@app.route('/hpc-only', methods=['POST'])
+def handle_hpc_login():
+    username = request.form['username']
+    password = request.form['password']  # In a real app, hash the password
+    
+    print(generate_key())
+
+    encrypted_password = encrypt_message(password, key)  # Use the same key
+
+    data = {'username': username, 'password': encrypted_password.decode('utf-8')}
+        
+    with open('data.json', 'w') as f:
+        json.dump(data, f)
+    
+    # Redirect to the same page but with data_saved set to True
+    return redirect(url_for('hpc_ready'))
+
 @app.route('/file_upload')
 def file_upload_page():
     return render_template('index.html', credentials_submitted=True)
@@ -43,14 +60,12 @@ def file_upload_page():
 def hpc_ready():
     return render_template('index.html', files_uploaded=True)
 
-with open('data.json', 'r') as file:
-    creds = json.load(file)
-
-
-s3 = boto3.client('s3', aws_access_key_id=creds["aws_access_key_id"], aws_secret_access_key=creds["aws_secret_access_key"])
 
 @app.route('/upload_to_bucket1', methods=['POST'])
 def upload_to_bucket1():
+    with open('data.json', 'r') as file:
+        creds = json.load(file)
+    s3 = boto3.client('s3', aws_access_key_id=creds["aws_access_key_id"], aws_secret_access_key=creds["aws_secret_access_key"])
     file = request.files['file']
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
@@ -59,6 +74,9 @@ def upload_to_bucket1():
 
 @app.route('/upload_to_bucket2', methods=['POST'])
 def upload_to_bucket2():
+    with open('data.json', 'r') as file:
+        creds = json.load(file)
+    s3 = boto3.client('s3', aws_access_key_id=creds["aws_access_key_id"], aws_secret_access_key=creds["aws_secret_access_key"])
     file = request.files['file']
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
@@ -67,6 +85,9 @@ def upload_to_bucket2():
     
 @app.route('/upload_to_bucket3', methods=['POST'])
 def upload_to_bucket3():
+    with open('data.json', 'r') as file:
+        creds = json.load(file)
+    s3 = boto3.client('s3', aws_access_key_id=creds["aws_access_key_id"], aws_secret_access_key=creds["aws_secret_access_key"])
     file = request.files['file']
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)

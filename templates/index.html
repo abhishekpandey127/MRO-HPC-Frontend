@@ -127,7 +127,7 @@
             </form>
         {% else %}
             <h2>Enter HPC Credentials</h2>
-            <form action="/submit-form" method="post">
+            <form id="credentialsForm" action="/hpc-only" method="post">
                 <div class="form-group">
                     <label for="username">Username:</label>
                     <input type="text" id="username" name="username">
@@ -137,15 +137,20 @@
                     <label for="password">Password:</label>
                     <input type="password" id="password" name="password">
                 </div>
-                
                 <div class="form-group">
-                    <label for="aws_access_key_id">AWS_ACCESS_KEY_ID:</label>
-                    <input type="text" id="aws_access_key_id" name="aws_access_key_id">
+                    <input type="checkbox" id="awsCredentialsToggle" name="awsCredentialsToggle" onchange="updateFormAction()">
+                    <label for="awsCredentialsToggle">Provide AWS Credentials</label>
                 </div>
-                
-                <div class="form-group">
-                    <label for="aws_secret_access_key">AWS_SECRET_ACCESS_KEY:</label>
-                    <input type="text" id="aws_secret_access_key" name="aws_secret_access_key">
+                <div id="awsCredentialsFields" style="display: none;">
+                    <div class="form-group">
+                        <label for="aws_access_key_id">AWS_ACCESS_KEY_ID:</label>
+                        <input type="text" id="aws_access_key_id" name="aws_access_key_id">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="aws_secret_access_key">AWS_SECRET_ACCESS_KEY:</label>
+                        <input type="text" id="aws_secret_access_key" name="aws_secret_access_key">
+                    </div>
                 </div>
                 
                 <input type="submit" value="Submit">            
@@ -178,6 +183,22 @@
                 alert('Error: ' + error);
             });
         }
-        </script>   
+        </script>
+        
+        <script>
+            function updateFormAction() {
+                var form = document.getElementById('credentialsForm');
+                var awsCredentialsToggle = document.getElementById('awsCredentialsToggle');
+                var awsCredentialsFields = document.getElementById('awsCredentialsFields');
+        
+                if (awsCredentialsToggle.checked) {
+                    form.action = '/hpc-aws';
+                    awsCredentialsFields.style.display = 'block';
+                } else {
+                    form.action = '/hpc-only';
+                    awsCredentialsFields.style.display = 'none';
+                }
+            }
+        </script>
 </body>
 </html>
