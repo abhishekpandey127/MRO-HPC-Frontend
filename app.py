@@ -1,12 +1,15 @@
 from flask import Flask, request, render_template, redirect, url_for
 import json
 import paramiko
+import bcrypt
 import json
 import os
 import time
 import re
+from cryptography.fernet import Fernet
 
 app = Flask(__name__)
+key = b'2QRt49fEUksjR6Yxpmjs98qtJ7-RYmKXLXblEKMuSjU='
 
 @app.route('/')
 def index():
@@ -16,9 +19,12 @@ def index():
 def handle_login():
     username = request.form['username']
     password = request.form['password']  # In a real app, hash the password
+    print(generate_key())
 
-    data = {'username': username, 'password': password}
-    
+    encrypted_password = encrypt_message(password, key)  # Use the same key
+
+    data = {'username': username, 'password': encrypted_password.decode('utf-8')}
+        
     with open('data.json', 'w') as f:
         json.dump(data, f)
     
@@ -66,7 +72,8 @@ def run_script():
         
         #Connecting to Gateway
         print("Connecting to gateway server...")
-        ssh_connect(ssh, 'gw.hpc.nyu.edu', creds['username'], creds['password'])
+        decrypted_password = decrypt_message(creds['password'].encode('utf-8'), key)
+        ssh_connect(ssh, 'gw.hpc.nyu.edu', creds['username'], decrypted_password)
         print("Connection to gateway successful \n")
         
         #Connecting to Greene
@@ -78,7 +85,7 @@ def run_script():
         # while not target_ssh.recv_ready():  # Wait for the server to be ready
 
         time.sleep(5)
-        target_ssh.send(creds['password'] + '\n')
+        target_ssh.send(decrypted_password + '\n')
         print("Connection to target server successful\n")
 
         time.sleep(5)
@@ -102,22 +109,23 @@ def run_script():
     except Exception as e:
         # Handle exceptions and return an error message
         return f"<h1>Error</h1><p>{e}</p>"
-    except FileNotFoundError:
-        print(f"Credentials file '{json_file_path}' not found.")
-    except json.JSONDecodeError:
-        print(f"Error decoding JSON from the file '{json_file_path}'.")
-    except KeyError:
-        print(f"Missing required credential fields in '{json_file_path}'.")
-    except paramiko.AuthenticationException:
-        print("Authentication failed, please verify your credentials")
-    except paramiko.BadHostKeyException as badHostKeyException:
-        print("Unable to verify server's host key: %s" % badHostKeyException)
-    except paramiko.SSHException as e:
-        print("SSH error: ", e)
-    except Exception as e:
-        print("Operation error: %s" % e)
     finally:
         ssh.close()
+
+def generate_key():
+    return Fernet.generate_key()
+
+# Function to encrypt a message
+def encrypt_message(message, key):
+    f = Fernet(key)
+    encrypted_message = f.encrypt(message.encode())
+    return encrypted_message
+
+# Function to decrypt a message
+def decrypt_message(encrypted_message, key):
+    f = Fernet(key)
+    decrypted_message = f.decrypt(encrypted_message).decode()
+    return decrypted_message
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5001)
