@@ -17,6 +17,11 @@ logging.basicConfig(level=logging.INFO)
 app = Flask(__name__)
 key = b'2QRt49fEUksjR6Yxpmjs98qtJ7-RYmKXLXblEKMuSjU='
 
+ALLOWED_EXTENSIONS = {'dat', 'json'}
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 @app.route('/')
 def index():
     return render_template('index.html', data_saved=False)
