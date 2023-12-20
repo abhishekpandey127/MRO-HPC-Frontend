@@ -23,6 +23,8 @@ HPC systems use SBatch in order to allocate resources and run commands. Create y
 #SBATCH --time=1:00:00                   # Computation time 1hr
 #SBATCH --mem=10GB                       # Memory requested 10GB
 #SBATCH --job-name=sbatch-mroptimum
+#SBATCH --mail-type=END
+#SBATCH --mail-user=youremail@domain.com
 #SBATCH --output=/scratch/<netID>/your/preferred/path/demo_%j.out
 #SBATCH --error=/scratch/<netID>/your/preferred/path/demo_%j.err
 #SBATCH --exclusive
