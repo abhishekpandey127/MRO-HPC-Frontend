@@ -103,7 +103,7 @@
             <h2>An Error Occured</h2>
             <p>"{{ error_message }}"</p>
         {% elif credentials_submitted %}
-            <h2>Upload Files</h2>
+            <h2>Upload Files to AWS S3</h2>
             <form id="uploadForm1" enctype="multipart/form-data">
                 <div class="form-group">    
                     <label for="signalfile">Add Signal File</label>
@@ -128,7 +128,33 @@
                 </div>
             </form>
             <form action="/hpc_ready" method="get">
-                <input type="submit" value="Next">   
+                <input type="submit" value="Next">
+        {% elif scp_files %}
+            <h2>Upload Files to HPC</h2>
+            <form id="uploadFormHPC1" enctype="multipart/form-data">
+                <div class="form-group">    
+                    <label for="signalfileHPC">Add Signal File to HPC</label>
+                    <input type="file" name="file">
+                    <input type="button" value="Upload to /scratch/NetID/test/mro/cloudmrhubdata" onclick="uploadFileHPC(1);">
+                </div>
+            </form>
+            
+            <form id="uploadFormHPC2" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="noisefileHPC">Add Noise File to HPC</label>
+                    <input type="file" name="file">
+                    <input type="button" value="Upload to /scratch/NetID/test/mro/cloudmrhubdata" onclick="uploadFileHPC(2);">
+                </div>
+            </form>
+            <form id="uploadFormHPC3" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="jsonjob">Add JSON Job to HPC</label>
+                    <input type="file" name="file">
+                    <input type="button" value="Upload to /scratch/NetID/test/mro/mroptimum-jobs" onclick="uploadFileHPC(3);">
+                </div>
+            </form>
+            <form action="/hpc_ready" method="get">
+                <input type="submit" value="Next">     
         {% elif files_uploaded %}
             <h2>Run HPC Script</h2>
             <form action="/run_script" method="post">
@@ -161,7 +187,6 @@
                         <input type="password" id="aws_secret_access_key" name="aws_secret_access_key">
                     </div>
                 </div>
-                
                 <input type="submit" value="Submit">            
             </form>
         {% endif %}
@@ -192,22 +217,42 @@
                 alert('Error: ' + error);
             });
         }
-        </script>
-        
-        <script>
-            function updateFormAction() {
-                var form = document.getElementById('credentialsForm');
-                var awsCredentialsToggle = document.getElementById('awsCredentialsToggle');
-                var awsCredentialsFields = document.getElementById('awsCredentialsFields');
-        
-                if (awsCredentialsToggle.checked) {
-                    form.action = '/hpc-aws';
-                    awsCredentialsFields.style.display = 'block';
-                } else {
-                    form.action = '/hpc-only';
-                    awsCredentialsFields.style.display = 'none';
+
+        function uploadFileHPC(formId) {
+            var formData = new FormData(document.getElementById('uploadFormHPC' + formId));
+            formData.append('fileId', formId);
+
+            fetch('/upload_to_hpc' + formId, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.text())
+            .then(data => {
+                alert(data);
+                successfulUploads++;
+                if (successfulUploads >= 3) {
+                    document.getElementById('nextButton').style.display = 'block';
                 }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error: ' + error);
+            });
+        }
+
+        function updateFormAction() {
+            var form = document.getElementById('credentialsForm');
+            var awsCredentialsToggle = document.getElementById('awsCredentialsToggle');
+            var awsCredentialsFields = document.getElementById('awsCredentialsFields');
+    
+            if (awsCredentialsToggle.checked) {
+                form.action = '/hpc-aws';
+                awsCredentialsFields.style.display = 'block';
+            } else {
+                form.action = '/hpc-only';
+                awsCredentialsFields.style.display = 'none';
             }
-        </script>
+        }
+    </script>
 </body>
 </html>
